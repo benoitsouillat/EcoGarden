@@ -2,13 +2,15 @@
 
 namespace App\Factory;
 
-use App\Entity\Conseil;
+use App\Entity\User;
 use Zenstruck\Foundry\Persistence\PersistentProxyObjectFactory;
+use Faker\Factory as FakerFactory;
+
 
 /**
- * @extends PersistentProxyObjectFactory<Conseil>
+ * @extends PersistentProxyObjectFactory<User>
  */
-final class ConseilFactory extends PersistentProxyObjectFactory
+final class UserFactory extends PersistentProxyObjectFactory
 {
     /**
      * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#factories-as-services
@@ -21,7 +23,7 @@ final class ConseilFactory extends PersistentProxyObjectFactory
 
     public static function class(): string
     {
-        return Conseil::class;
+        return User::class;
     }
 
     /**
@@ -32,9 +34,10 @@ final class ConseilFactory extends PersistentProxyObjectFactory
     protected function defaults(): array|callable
     {
         return [
-            'date' => self::faker()->dateTime(),
-            'description' => self::faker()->text(),
-            'user' => UserFactory::random(),
+            'email' => self::faker()->email(),
+            'password' => self::faker()->password(),
+            'postalCode' => str_pad((string) self::faker()->numberBetween(100, 9599), 4, '0', STR_PAD_LEFT) . '0',
+            'roles' => [self::faker()->randomElement(['ROLE_USER', 'ROLE_ADMIN'])],
         ];
     }
 
@@ -44,7 +47,7 @@ final class ConseilFactory extends PersistentProxyObjectFactory
     protected function initialize(): static
     {
         return $this
-            // ->afterInstantiate(function(Conseil $conseil): void {})
+            // ->afterInstantiate(function(User $user): void {})
         ;
     }
 }
