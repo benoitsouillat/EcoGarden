@@ -18,18 +18,19 @@ class Conseil
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups(['getConseils'])]
     #[Assert\NotBlank(message: "La date (le mois) du conseil est obligatoire.")]
+    #[Groups(['getConseils'])]
     private ?\DateTime $date = null;
 
+    #[ORM\Column(type: Types::TEXT)]
     #[Assert\NotBlank(message: "Le contenu du conseil est obligatoire.")]
     #[Assert\Length(min: 1, minMessage:  "Le contenu du conseil est trop court.")]
-    #[ORM\Column(type: Types::TEXT)]
     #[Groups(['getConseils'])]
     private ?string $description = null;
 
     #[ORM\ManyToOne(inversedBy: 'conseils')]
     #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['getConseils'])]
     private ?User $User = null;
 
 
