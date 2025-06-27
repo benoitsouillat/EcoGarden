@@ -5,6 +5,8 @@ namespace App\Entity;
 use App\Repository\ConseilRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ConseilRepository::class)]
 class Conseil
@@ -12,13 +14,25 @@ class Conseil
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['getConseils'])]
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Assert\NotBlank(message: "La date (le mois) du conseil est obligatoire.")]
+    #[Groups(['getConseils'])]
     private ?\DateTime $date = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Assert\NotBlank(message: "Le contenu du conseil est obligatoire.")]
+    #[Assert\Length(min: 1, minMessage:  "Le contenu du conseil est trop court.")]
+    #[Groups(['getConseils'])]
     private ?string $description = null;
+
+    #[ORM\ManyToOne(inversedBy: 'conseils')]
+    #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['getConseils'])]
+    private ?User $User = null;
+
 
     public function getId(): ?int
     {
@@ -45,6 +59,18 @@ class Conseil
     public function setDescription(string $description): static
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->User;
+    }
+
+    public function setUser(?User $User): static
+    {
+        $this->User = $User;
 
         return $this;
     }
