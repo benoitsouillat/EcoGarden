@@ -2,19 +2,25 @@
 
 namespace App\Controller;
 
+use App\Repository\ConseilRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/conseil', name: 'api_conseil_')]
+#[Route('/api/conseil', name: 'api_conseil_')]
 final class ConseilController extends AbstractController
 {
-    #[Route('', name: 'index')]
-    public function index(): JsonResponse
+    public function __construct(
+        public readonly ConseilRepository $repository
+    ){}
+
+    #[Route('', name: 'conseils', methods: ['GET'])]
+    public function getAllConseils(): JsonResponse
     {
-        return $this->json([
-            'message' => 'Welcome to your new controller!',
-            'path' => 'src/Controller/ConseilController.php',
+        $conseils = $this->repository->findAll();
+
+        return new JsonResponse([
+            'conseils' => $conseils,
         ]);
     }
 }
