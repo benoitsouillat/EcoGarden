@@ -29,7 +29,7 @@ final class ConseilController extends AbstractController
     public function getAllConseils(): JsonResponse
     {
         $conseils = $this->manager->getRepository(Conseil::class)->findAll();
-        $json = $this->serializer->serialize($conseils, 'json');
+        $json = $this->serializer->serialize($conseils, 'json', ['groups' => 'getConseils']);
 
         return new JsonResponse($json, Response::HTTP_OK, [], true);
     }
@@ -62,7 +62,7 @@ final class ConseilController extends AbstractController
         return new JsonResponse($json, Response::HTTP_OK, [], true);
     }
 
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted('ROLE_ADMIN', message: "Vous devez être administrateur pour modifier ce conseil.")]
     #[Route('/{id}', name: 'edit', methods: ['PUT'])]
     public function editConseil(Conseil $conseil, Request $request): JsonResponse
     {

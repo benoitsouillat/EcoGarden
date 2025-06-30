@@ -30,14 +30,14 @@ final class AdministratorFactory extends PersistentProxyObjectFactory
         return [
             'email' => "dev.souillat@gmail.com",
             'password' => "password",
-            'postalCode' => '19410',
-            'roles' => ['ROLE_USER', 'ROLE_ADMIN'],
+            'postalCode' => '19410'
         ];
     }
 
     protected function initialize(): static
     {
         return $this->afterInstantiate(function(User $user) {
+            $user->setRoles(['ROLE_USER', 'ROLE_ADMIN']);
             $user->setPassword(
                 $this->passwordHasher->hashPassword($user, $user->getPassword())
             );
