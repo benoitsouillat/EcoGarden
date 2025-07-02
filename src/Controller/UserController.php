@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,7 +16,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 final class UserController extends AbstractController
 {
     public function __construct(
-        private readonly UserRepository $repository,
+        public readonly EntityManagerInterface $manager,
         private readonly SerializerInterface $serializer,
         public readonly ValidatorInterface $validator,
     )
@@ -27,13 +28,16 @@ final class UserController extends AbstractController
     {
         $user = $this->serializer->deserialize($request->getContent(), User::class, 'json');
         $errors = $this->validator->validate($user);
-
         if ($errors->count() > 0) {
             return new JsonResponse($this->serializer->serialize($errors, 'json'), Response::HTTP_BAD_REQUEST, [], true);
         }
-        return $this->json([
-            'message' => 'Welcome to your new controller!',
-            'path' => 'src/Controller/UserController.php',
-        ]);
+        if ($this->manager->getRepository(User::class)->findOneBy(['email' => $user->getEmail()])) {
+            return new JsonResponse($this->serializer->serialize(['error' => 'Cet utilisateur existe déjà'], 'json'), Response::HTTP_BAD_REQUEST, [], true);
+        }
+        $this->manager->persist($user);
+        $this->manager->flush();
+        $json = $this->serializer->serialize($user, 'json');
+        return new JsonResponse($json, Response::HTTP_CREATED, [], true);
+
     }
 }
