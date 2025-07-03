@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Conseil;
 use App\Entity\User;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -36,15 +37,14 @@ final class ConseilController extends AbstractController
 
     #[IsGranted('ROLE_ADMIN')]
     #[Route('', name: 'add', methods: ['POST'])]
-    public function addConseil(Request $request, UrlGeneratorInterface $urlGenerator): JsonResponse
-    {
+    public function addConseil(Request $request, UrlGeneratorInterface $urlGenerator, Security $security): JsonResponse {
         $conseil = $this->serializer->deserialize($request->getContent(), Conseil::class, 'json');
         $errors = $this->validator->validate($conseil);
 
         if ($errors->count() > 0) {
             return new JsonResponse($this->serializer->serialize($errors, 'json'), Response::HTTP_BAD_REQUEST, [], true);
         }
-        $user = $request->get('userId') ? $this->manager->getRepository(User::class)->find($request->get('userId')) : null;
+        $user = $security->getUser();
         $conseil->setUser($user);
         $this->manager->persist($conseil);
         $this->manager->flush();
@@ -56,16 +56,14 @@ final class ConseilController extends AbstractController
     }
 
     #[Route('/{id}', name: 'conseil_show', methods: ['GET'])]
-    public function getConseil(Conseil $conseil): JsonResponse
-    {
+    public function getConseil(Conseil $conseil): JsonResponse {
         $json = $this->serializer->serialize($conseil, 'json', ['groups' => 'getConseils']);
         return new JsonResponse($json, Response::HTTP_OK, [], true);
     }
 
     #[IsGranted('ROLE_ADMIN', message: "Vous devez être administrateur pour modifier ce conseil.")]
     #[Route('/{id}', name: 'edit', methods: ['PUT'])]
-    public function editConseil(Conseil $conseil, Request $request): JsonResponse
-    {
+    public function editConseil(Conseil $conseil, Request $request): JsonResponse {
         $updatedConseil = $this->serializer->deserialize($request->getContent(), Conseil::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $conseil]);
         $errors = $this->validator->validate($conseil);
         if ($errors->count() > 0) {
@@ -79,8 +77,7 @@ final class ConseilController extends AbstractController
 
     #[IsGranted('ROLE_ADMIN', message: "Vous devez être administrateur pour supprimer ce conseil.")]
     #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
-    public function deleteConseil(Conseil $conseil): JsonResponse
-    {
+    public function deleteConseil(Conseil $conseil): JsonResponse {
         $this->manager->remove($conseil);
         $this->manager->flush();
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
