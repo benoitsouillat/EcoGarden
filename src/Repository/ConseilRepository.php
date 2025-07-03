@@ -16,6 +16,14 @@ class ConseilRepository extends ServiceEntityRepository
         parent::__construct($registry, Conseil::class);
     }
 
+    public function findAllByMonth(int $month) {
+        return $this->createQueryBuilder('c')
+            ->andWhere('c.month = :month')
+            ->setParameter('month', $month)
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return Conseil[] Returns an array of Conseil objects
     //     */

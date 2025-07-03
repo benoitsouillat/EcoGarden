@@ -17,11 +17,6 @@ class Conseil
     #[Groups(['getConseils'])]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Assert\NotBlank(message: "La date (le mois) du conseil est obligatoire.")]
-    #[Groups(['getConseils'])]
-    private ?\DateTime $date = null;
-
     #[ORM\Column(type: Types::TEXT)]
     #[Assert\NotBlank(message: "Le contenu du conseil est obligatoire.")]
     #[Assert\Length(min: 1, minMessage:  "Le contenu du conseil est trop court.")]
@@ -33,22 +28,17 @@ class Conseil
     #[Groups(['getConseils'])]
     private ?User $User = null;
 
+    #[Assert\NotBlank(message: "Le mois du conseil est obligatoire.")]
+    #[Assert\LessThan(1, message: "Vous devez entrer le numéro d'un mois valide.")]
+    #[Assert\GreaterThan(12, message: "Vous devez entrer le numéro d'un mois valide.")]
+    #[Groups(['getConseils'])]
+    #[ORM\Column]
+    private ?int $month = null;
+
 
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getDate(): ?\DateTime
-    {
-        return $this->date;
-    }
-
-    public function setDate(\DateTime $date): static
-    {
-        $this->date = $date;
-
-        return $this;
     }
 
     public function getDescription(): ?string
@@ -71,6 +61,18 @@ class Conseil
     public function setUser(?User $User): static
     {
         $this->User = $User;
+
+        return $this;
+    }
+
+    public function getMonth(): ?int
+    {
+        return $this->month;
+    }
+
+    public function setMonth(int $month): static
+    {
+        $this->month = $month;
 
         return $this;
     }

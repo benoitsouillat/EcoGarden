@@ -26,6 +26,7 @@ final class ConseilController extends AbstractController
         public readonly ValidatorInterface $validator,
     ){}
 
+    #[IsGranted('ROLE_USER', message: "Vous devez d'abord vous connecter")]
     #[Route('', name: 'conseils', methods: ['GET'])]
     public function getAllConseils(): JsonResponse
     {
@@ -35,7 +36,7 @@ final class ConseilController extends AbstractController
         return new JsonResponse($json, Response::HTTP_OK, [], true);
     }
 
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted('ROLE_Admin', message: "Vous devez être administrateur pour ajouter un conseil.")]
     #[Route('', name: 'add', methods: ['POST'])]
     public function addConseil(Request $request, UrlGeneratorInterface $urlGenerator, Security $security): JsonResponse {
         $conseil = $this->serializer->deserialize($request->getContent(), Conseil::class, 'json');
@@ -52,14 +53,23 @@ final class ConseilController extends AbstractController
         $location = $urlGenerator->generate('api_conseil_add', ['id' => $conseil->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
 
         return new JsonResponse($json, Response::HTTP_CREATED, ['Location' => $location], true);
-
     }
 
+    /*#[IsGranted('ROLE_USER', message: "Vous devez d'abord vous connecter")]*/
+    #[Route('/{month}', name: 'conseil_show', methods: ['GET'])]
+    public function getConseilsByMonth(Request $request): JsonResponse {
+        $month = $request->get('month');
+        $conseils = $this->manager->getRepository(Conseil::class)->findAllByMonth($month);
+        $json = $this->serializer->serialize($conseils, 'json', ['groups' => 'getConseils']);
+        return new JsonResponse($json, Response::HTTP_OK, [], true);
+    }
+
+/*    #[IsGranted('ROLE_USER', message: "Vous devez d'abord vous connecter")]
     #[Route('/{id}', name: 'conseil_show', methods: ['GET'])]
     public function getConseil(Conseil $conseil): JsonResponse {
         $json = $this->serializer->serialize($conseil, 'json', ['groups' => 'getConseils']);
         return new JsonResponse($json, Response::HTTP_OK, [], true);
-    }
+    }*/
 
     #[IsGranted('ROLE_ADMIN', message: "Vous devez être administrateur pour modifier ce conseil.")]
     #[Route('/{id}', name: 'edit', methods: ['PUT'])]

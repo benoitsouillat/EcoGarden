@@ -32,7 +32,7 @@ final class ConseilFactory extends PersistentProxyObjectFactory
     protected function defaults(): array|callable
     {
         return [
-            'date' => self::faker()->dateTime(),
+            'month' => self::faker()->numberBetween(1, 12),
             'description' => self::faker()->text(),
             'user' => UserFactory::random(),
         ];
