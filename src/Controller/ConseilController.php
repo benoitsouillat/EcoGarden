@@ -68,20 +68,16 @@ final class ConseilController extends AbstractController
     {
         $updatedConseil = $this->serializer->deserialize($request->getContent(), Conseil::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $conseil]);
         $errors = $this->validator->validate($conseil);
-
-        $content = $request->toArray();
         if ($errors->count() > 0) {
             return new JsonResponse($this->serializer->serialize($errors, 'json'), Response::HTTP_BAD_REQUEST, [], true);
         }
-        $user = $content['userId'] ? $this->manager->getRepository(User::class)->find($content['userId']) : null;
-        $conseil->setUser($user);
         $this->manager->persist($updatedConseil);
         $this->manager->flush();
 
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted('ROLE_ADMIN', message: "Vous devez être administrateur pour supprimer ce conseil.")]
     #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
     public function deleteConseil(Conseil $conseil): JsonResponse
     {
