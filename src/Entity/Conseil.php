@@ -29,8 +29,8 @@ class Conseil
     private ?User $User = null;
 
     #[Assert\NotBlank(message: "Le mois du conseil est obligatoire.")]
-    #[Assert\LessThan(1, message: "Vous devez entrer le numéro d'un mois valide.")]
-    #[Assert\GreaterThan(12, message: "Vous devez entrer le numéro d'un mois valide.")]
+    #[Assert\LessThanOrEqual(12, message: "Vous devez entrer le numéro d'un mois valide.")]
+    #[Assert\GreaterThanOrEqual(1, message: "Vous devez entrer le numéro d'un mois valide.")]
     #[Groups(['getConseils'])]
     #[ORM\Column]
     private ?int $month = null;

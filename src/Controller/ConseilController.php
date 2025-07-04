@@ -9,12 +9,14 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Exception\ValidationFailedException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/conseil', name: 'api_conseil_')]
@@ -26,7 +28,6 @@ final class ConseilController extends AbstractController
         public readonly ValidatorInterface $validator,
     ){}
 
-    #[IsGranted('ROLE_USER', message: "Vous devez d'abord vous connecter")]
     #[Route('', name: 'conseils', methods: ['GET'])]
     public function getAllConseils(): JsonResponse
     {
@@ -36,7 +37,18 @@ final class ConseilController extends AbstractController
         return new JsonResponse($json, Response::HTTP_OK, [], true);
     }
 
-    #[IsGranted('ROLE_Admin', message: "Vous devez être administrateur pour ajouter un conseil.")]
+    #[Route('/{month}', name: 'conseil_show', requirements: ['id'=>'\d+'], methods: ['GET'])]
+    public function getConseilsByMonth(Request $request): JsonResponse {
+        $month = $request->get('month');
+        if ($month > 12 || $month < 1) {
+            throw new HttpException(Response::HTTP_BAD_REQUEST, "Veuillez consulter un mois valide");
+        }
+        $conseils = $this->manager->getRepository(Conseil::class)->findAllByMonth($month);
+        $json = $this->serializer->serialize($conseils, 'json', ['groups' => 'getConseils']);
+        return new JsonResponse($json, Response::HTTP_OK, [], true);
+    }
+
+    #[IsGranted('ROLE_ADMIN', message: "Vous devez être administrateur pour ajouter un conseil.")]
     #[Route('', name: 'add', methods: ['POST'])]
     public function addConseil(Request $request, UrlGeneratorInterface $urlGenerator, Security $security): JsonResponse {
         $conseil = $this->serializer->deserialize($request->getContent(), Conseil::class, 'json');
@@ -55,29 +67,14 @@ final class ConseilController extends AbstractController
         return new JsonResponse($json, Response::HTTP_CREATED, ['Location' => $location], true);
     }
 
-    /*#[IsGranted('ROLE_USER', message: "Vous devez d'abord vous connecter")]*/
-    #[Route('/{month}', name: 'conseil_show', methods: ['GET'])]
-    public function getConseilsByMonth(Request $request): JsonResponse {
-        $month = $request->get('month');
-        $conseils = $this->manager->getRepository(Conseil::class)->findAllByMonth($month);
-        $json = $this->serializer->serialize($conseils, 'json', ['groups' => 'getConseils']);
-        return new JsonResponse($json, Response::HTTP_OK, [], true);
-    }
-
-/*    #[IsGranted('ROLE_USER', message: "Vous devez d'abord vous connecter")]
-    #[Route('/{id}', name: 'conseil_show', methods: ['GET'])]
-    public function getConseil(Conseil $conseil): JsonResponse {
-        $json = $this->serializer->serialize($conseil, 'json', ['groups' => 'getConseils']);
-        return new JsonResponse($json, Response::HTTP_OK, [], true);
-    }*/
-
     #[IsGranted('ROLE_ADMIN', message: "Vous devez être administrateur pour modifier ce conseil.")]
-    #[Route('/{id}', name: 'edit', methods: ['PUT'])]
+    #[Route('/{id}', name: 'edit', requirements: ['id'=>'\d+'], methods: ['PUT'],)]
     public function editConseil(Conseil $conseil, Request $request): JsonResponse {
         $updatedConseil = $this->serializer->deserialize($request->getContent(), Conseil::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $conseil]);
-        $errors = $this->validator->validate($conseil);
+        $errors = $this->validator->validate($updatedConseil);
         if ($errors->count() > 0) {
-            return new JsonResponse($this->serializer->serialize($errors, 'json'), Response::HTTP_BAD_REQUEST, [], true);
+            throw new ValidationFailedException("400", $errors);
+            /*return new JsonResponse($this->serializer->serialize($errors, 'json'), Response::HTTP_BAD_REQUEST, [], true);*/
         }
         $this->manager->persist($updatedConseil);
         $this->manager->flush();
@@ -86,7 +83,7 @@ final class ConseilController extends AbstractController
     }
 
     #[IsGranted('ROLE_ADMIN', message: "Vous devez être administrateur pour supprimer ce conseil.")]
-    #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
+    #[Route('/{id}', name: 'delete', requirements: ['id'=>'\d+'], methods: ['DELETE'])]
     public function deleteConseil(Conseil $conseil): JsonResponse {
         $this->manager->remove($conseil);
         $this->manager->flush();
