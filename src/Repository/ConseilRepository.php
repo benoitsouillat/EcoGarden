@@ -24,8 +24,10 @@ class ConseilRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findAllWithPagination($page, $limit) {
+    public function findAllWithPagination(int $month, int $page, int $limit) {
         $qb = $this->createQueryBuilder('c')
+            ->andWhere('c.month = :month')
+            ->setParameter('month', $month)
             ->setFirstResult(($page - 1) * $limit)
             ->setMaxResults($limit);
         return $qb->getQuery()->getResult();

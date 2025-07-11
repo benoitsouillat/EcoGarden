@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Conseil;
 use App\Entity\User;
+use DateTime;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -38,9 +39,10 @@ final class ConseilController extends AbstractController
         $idCache = "getAllConseils-" . $page . "-" . $limit;
 
         $json = $cache->get($idCache, function (ItemInterface $item) use ($repo, $page, $limit) {
+            $month = (int)(new DateTime())->format('m');
             $item->tag('conseilsCache');
             $item->expiresAfter(60);
-            $conseils = $repo->findAllWithPagination($page, $limit);
+            $conseils = $repo->findAllWithPagination($month, $page, $limit);
             return $this->serializer->serialize($conseils, 'json', ['groups' => 'getConseils']);
         });
         return new JsonResponse($json, Response::HTTP_OK, [], true);
