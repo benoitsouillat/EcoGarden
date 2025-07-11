@@ -20,7 +20,7 @@ class ExceptionSubscriber implements EventSubscriberInterface
                 'status' => 401,
                 'message' => "Vous devez être connecté pour accéder à cette ressource",
             ];
-            $event->setResponse(new JsonResponse($data));
+            $event->setResponse(new JsonResponse($data, 401));
         }
         elseif ($exception instanceof ValidationFailedException) {
             $violations = $exception->getViolations();
@@ -33,7 +33,7 @@ class ExceptionSubscriber implements EventSubscriberInterface
             }
             $data = [
                 'status' => 400,
-                'message' => "Erreur : Mauvaise requète ou mauvais paramètre",
+                'message' => "Erreur : Mauvaise requête ou mauvais paramètre :",
                 'errors' => $errors,
             ];
             $event->setResponse(new JsonResponse($data, 400));

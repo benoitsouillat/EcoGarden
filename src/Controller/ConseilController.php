@@ -18,6 +18,8 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Cache\ItemInterface;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 #[Route('/conseil', name: 'api_conseil_')]
 final class ConseilController extends AbstractController
@@ -29,11 +31,18 @@ final class ConseilController extends AbstractController
     ){}
 
     #[Route('', name: 'conseils', methods: ['GET'])]
-    public function getAllConseils(): JsonResponse
-    {
-        $conseils = $this->manager->getRepository(Conseil::class)->findAll();
-        $json = $this->serializer->serialize($conseils, 'json', ['groups' => 'getConseils']);
+    public function getAllConseils(Request $request, TagAwareCacheInterface $cache): JsonResponse {
+        $page = $request->get('page', 1);
+        $limit = $request->get('limit', 5);
+        $repo = $this->manager->getRepository(Conseil::class);
+        $idCache = "getAllConseils-" . $page . "-" . $limit;
 
+        $json = $cache->get($idCache, function (ItemInterface $item) use ($repo, $page, $limit) {
+            $item->tag('conseilsCache');
+            $item->expiresAfter(60);
+            $conseils = $repo->findAllWithPagination($page, $limit);
+            return $this->serializer->serialize($conseils, 'json', ['groups' => 'getConseils']);
+        });
         return new JsonResponse($json, Response::HTTP_OK, [], true);
     }
 
@@ -74,7 +83,6 @@ final class ConseilController extends AbstractController
         $errors = $this->validator->validate($updatedConseil);
         if ($errors->count() > 0) {
             throw new ValidationFailedException("400", $errors);
-            /*return new JsonResponse($this->serializer->serialize($errors, 'json'), Response::HTTP_BAD_REQUEST, [], true);*/
         }
         $this->manager->persist($updatedConseil);
         $this->manager->flush();
@@ -84,7 +92,8 @@ final class ConseilController extends AbstractController
 
     #[IsGranted('ROLE_ADMIN', message: "Vous devez être administrateur pour supprimer ce conseil.")]
     #[Route('/{id}', name: 'delete', requirements: ['id'=>'\d+'], methods: ['DELETE'])]
-    public function deleteConseil(Conseil $conseil): JsonResponse {
+    public function deleteConseil(Conseil $conseil, TagAwareCacheInterface $cache): JsonResponse {
+        $cache->invalidateTags(['conseilsCache']);
         $this->manager->remove($conseil);
         $this->manager->flush();
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);

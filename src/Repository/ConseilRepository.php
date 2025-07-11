@@ -24,6 +24,12 @@ class ConseilRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findAllWithPagination($page, $limit) {
+        $qb = $this->createQueryBuilder('c')
+            ->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit);
+        return $qb->getQuery()->getResult();
+    }
     //    /**
     //     * @return Conseil[] Returns an array of Conseil objects
     //     */

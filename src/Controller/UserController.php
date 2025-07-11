@@ -55,6 +55,7 @@ final class UserController extends AbstractController
 
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
+
     #[IsGranted('ROLE_ADMIN', message: "Seuls les administrateurs peuvent mettre à jour les utilisateurs.")]
     #[Route('{id}', name: 'delete', requirements: ['id'=>'\d+'], methods: ['DELETE'])]
     public function deleteUser(User $user): JsonResponse {
