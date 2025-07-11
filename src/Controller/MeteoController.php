@@ -28,7 +28,7 @@ final class MeteoController extends AbstractController {
             $apiKey = $this->params->get('weatherApiKey');
             $response = file_get_contents("https://api.openweathermap.org/data/2.5/weather?zip=".$user->getPostalCode().",fr&appid=".$apiKey);
             $item->tag('meteoCache' . $user->getId());
-            $item->expiresAfter(60);
+            $item->expiresAfter(3600);
             return json_decode($response, true);
         });
         return new JsonResponse($weatherData, Response::HTTP_OK);
@@ -37,11 +37,12 @@ final class MeteoController extends AbstractController {
     #[Route('/{city}', name: 'city')]
     public function cityMeteo(Request $request): JsonResponse {
         $city = $request->get('city');
-        $weatherData = $this->cache->get($city, function (ItemInterface $item) use ($city) {
-        $apiKey = $this->params->get('weatherApiKey');
+        $idCache = "getMeteo-" . $city;
+        $weatherData = $this->cache->get($idCache, function (ItemInterface $item) use ($city) {
+            $apiKey = $this->params->get('weatherApiKey');
             $response = file_get_contents(sprintf("https://api.openweathermap.org/data/2.5/weather?q=%s,fr&appid=%s", $city, $apiKey));
             $item->tag('meteoCache' . $city);
-            $item->expiresAfter(60);
+            $item->expiresAfter(3600);
             return json_decode($response, true);
         });
         return new JsonResponse($weatherData, Response::HTTP_OK);

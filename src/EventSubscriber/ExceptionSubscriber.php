@@ -15,14 +15,7 @@ class ExceptionSubscriber implements EventSubscriberInterface
     public function onExceptionEvent(ExceptionEvent $event): void
     {
         $exception = $event->getThrowable();
-        if ($exception instanceof MissingTokenException) {
-            $data = [
-                'status' => 401,
-                'message' => "Vous devez être connecté pour accéder à cette ressource",
-            ];
-            $event->setResponse(new JsonResponse($data, 401));
-        }
-        elseif ($exception instanceof ValidationFailedException) {
+        if ($exception instanceof ValidationFailedException) {
             $violations = $exception->getViolations();
             $errors = [];
             foreach ($violations as $violation) {
