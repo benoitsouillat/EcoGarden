@@ -13,12 +13,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: php-${PROJECT_NAME}
     volumes:
       - ./:/code
+      - var_data:/code/var
     networks:
       - symfony_network
-    working_dir: /code
-    user: "root"
   mysql:
     image: mysql:8.2
     container_name: mysql-${PROJECT_NAME}
@@ -57,6 +57,7 @@ services:
 
 volumes:
   data:
+  var_data:
 
 networks:
   symfony_network:

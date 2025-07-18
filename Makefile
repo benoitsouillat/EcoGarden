@@ -2,7 +2,10 @@
 
 # Lance les conteneurs en arrière-plan
 up:
-	docker-compose --env-file .env.docker up --build
+	docker-compose --env-file .env.docker up -d --build && \
+    	echo "Attente de 5s pour la stabilisation des conteneurs..." && \
+    	sleep 5 && \
+    	docker-compose --env-file .env.docker exec php chown -R www-data:www-data /code/var
 
 # Arrête et supprime les conteneurs
 down:
