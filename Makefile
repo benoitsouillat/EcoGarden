@@ -1,0 +1,25 @@
+# Makefile pour simplifier la gestion de Docker
+
+# Lance les conteneurs en arrière-plan
+up:
+	docker-compose --env-file .env.docker up --build
+
+# Arrête et supprime les conteneurs
+down:
+	docker-compose --env-file .env.docker down
+
+# Vider les données
+prune:
+	docker-compose --env-file .env.docker down -v
+
+# Affiche les logs en temps réel
+logs:
+	docker-compose --env-file .env.docker logs -f
+
+# Redémarre les conteneurs
+restart:
+	docker-compose --env-file .env.docker restart
+
+#Vider la cache Symfony
+cache:
+	docker-compose exec php console cache:clear
