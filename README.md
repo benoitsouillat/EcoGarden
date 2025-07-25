@@ -27,7 +27,7 @@ Follow these steps to set up the local development environment:
     or
 
    Allow the executables ./symfony and ./symfony-composer and ```./symfony-composer install```
-4. Fill the .env or copy the values into a .env.dev
+4. Fill the .env or copy the values into a .env.dev with values choosen in .env.docker
 5. Create the database and its initial data:
 
     ```./symfony doctrine:migrations:migrate```

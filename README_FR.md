@@ -27,7 +27,7 @@ Suivez ces étapes pour mettre en place l'environnement de développement local 
     ou
 
    Autoriser les executables ./symfony et ./symfony-composer et ```./symfony-composer install```
-4. Remplir le .env ou copier les valeurs dans un .env.dev
+4. Remplir le .env ou copier les valeurs dans un .env.dev avec les valeurs choisies dans .env.docker
 5. Créer la base de données et ses données initiales :
 
     ```./symfony doctrine:migrations:migrate```
