@@ -43,8 +43,7 @@ final class ConseilFactory extends PersistentProxyObjectFactory
      */
     protected function initialize(): static
     {
-        return $this
-            // ->afterInstantiate(function(Conseil $conseil): void {})
-        ;
+        return $this// ->afterInstantiate(function(Conseil $conseil): void {})
+            ;
     }
 }

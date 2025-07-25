@@ -11,6 +11,13 @@ use Symfony\Component\Validator\Exception\ValidationFailedException;
 
 class ExceptionSubscriber implements EventSubscriberInterface
 {
+    public static function getSubscribedEvents(): array
+    {
+        return [
+            ExceptionEvent::class => 'onExceptionEvent',
+        ];
+    }
+
     public function onExceptionEvent(ExceptionEvent $event): void
     {
         $exception = $event->getThrowable();
@@ -42,12 +49,5 @@ class ExceptionSubscriber implements EventSubscriberInterface
             ];
             $event->setResponse(new JsonResponse($data, 500));
         }
-    }
-
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            ExceptionEvent::class => 'onExceptionEvent',
-        ];
     }
 }

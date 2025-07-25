@@ -9,7 +9,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ConseilRepository::class)]
-class Conseil {
+class Conseil
+{
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -18,7 +19,7 @@ class Conseil {
 
     #[ORM\Column(type: Types::TEXT)]
     #[Assert\NotBlank(message: "Le contenu du conseil est obligatoire.")]
-    #[Assert\Length(min: 1, minMessage:  "Le contenu du conseil est trop court.")]
+    #[Assert\Length(min: 1, minMessage: "Le contenu du conseil est trop court.")]
     #[Groups(['getConseils'])]
     private ?string $description = null;
 
@@ -35,35 +36,42 @@ class Conseil {
     private ?int $month = null;
 
 
-    public function getId(): ?int {
+    public function getId(): ?int
+    {
         return $this->id;
     }
 
-    public function getDescription(): ?string {
+    public function getDescription(): ?string
+    {
         return $this->description;
     }
 
-    public function setDescription(string $description): static {
+    public function setDescription(string $description): static
+    {
         $this->description = $description;
 
         return $this;
     }
 
-    public function getUser(): ?User {
+    public function getUser(): ?User
+    {
         return $this->User;
     }
 
-    public function setUser(?User $User): static {
+    public function setUser(?User $User): static
+    {
         $this->User = $User;
 
         return $this;
     }
 
-    public function getMonth(): ?int {
+    public function getMonth(): ?int
+    {
         return $this->month;
     }
 
-    public function setMonth(int $month): static {
+    public function setMonth(int $month): static
+    {
         $this->month = $month;
 
         return $this;

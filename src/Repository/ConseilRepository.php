@@ -16,7 +16,8 @@ class ConseilRepository extends ServiceEntityRepository
         parent::__construct($registry, Conseil::class);
     }
 
-    public function findAllByMonth(int $month) {
+    public function findAllByMonth(int $month)
+    {
         return $this->createQueryBuilder('c')
             ->andWhere('c.month = :month')
             ->setParameter('month', $month)
@@ -24,7 +25,8 @@ class ConseilRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findAllWithPagination(int $month, int $page, int $limit) {
+    public function findAllWithPagination(int $month, int $page, int $limit)
+    {
         $qb = $this->createQueryBuilder('c')
             ->andWhere('c.month = :month')
             ->setParameter('month', $month)

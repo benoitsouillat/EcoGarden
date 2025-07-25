@@ -14,6 +14,7 @@ use Faker\Factory as FakerFactory;
 final class AdministratorFactory extends PersistentProxyObjectFactory
 {
     private UserPasswordHasherInterface $passwordHasher;
+
     public function __construct(UserPasswordHasherInterface $passwordHasher)
     {
         parent::__construct();
@@ -36,7 +37,7 @@ final class AdministratorFactory extends PersistentProxyObjectFactory
 
     protected function initialize(): static
     {
-        return $this->afterInstantiate(function(User $user) {
+        return $this->afterInstantiate(function (User $user) {
             $user->setRoles(['ROLE_USER', 'ROLE_ADMIN']);
             $user->setPassword(
                 $this->passwordHasher->hashPassword($user, $user->getPassword())

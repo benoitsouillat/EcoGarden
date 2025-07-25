@@ -36,7 +36,7 @@ final class UserFactory extends PersistentProxyObjectFactory
         return [
             'email' => self::faker()->email(),
             'password' => self::faker()->password(),
-            'postalCode' => str_pad((string) self::faker()->numberBetween(100, 9599), 4, '0', STR_PAD_LEFT) . '0',
+            'postalCode' => str_pad((string)self::faker()->numberBetween(100, 9599), 4, '0', STR_PAD_LEFT) . '0',
             'roles' => [self::faker()->randomElement(['ROLE_USER', 'ROLE_ADMIN'])],
         ];
     }
@@ -46,8 +46,7 @@ final class UserFactory extends PersistentProxyObjectFactory
      */
     protected function initialize(): static
     {
-        return $this
-            // ->afterInstantiate(function(User $user): void {})
-        ;
+        return $this// ->afterInstantiate(function(User $user): void {})
+            ;
     }
 }
