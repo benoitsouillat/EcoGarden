@@ -24,10 +24,11 @@ final class MeteoController extends AbstractController {
     ){}
 
     #[Route('', name: 'user')]
-    public function userMeteo(Security $security, HttpClientInterface $httpClient): JsonResponse {
-        $user = $security->getUser();
+    public function userMeteo(HttpClientInterface $httpClient): JsonResponse
+    {
+        $user = $this->getUser();
         $idCache = "getMeteo-" . $user->getId();
-        $this->cache->invalidateTags(["meteoCache" . $user->getId()]);
+        /*$this->cache->invalidateTags(["meteoCache" . $user->getId()]);*/
         $weatherData = $this->cache->get($idCache, function (ItemInterface $item) use ($user, $httpClient) {
             $apiKey = $this->params->get('weatherApiKey');
             $response = $httpClient->request('GET', sprintf("https://api.openweathermap.org/data/2.5/weather?q=%s,fr&appid=%s&units=metric&lang=fr", $user->getPostalCode(), $apiKey));
@@ -43,7 +44,8 @@ final class MeteoController extends AbstractController {
     }
 
     #[Route('/{city}', name: 'city')]
-    public function cityMeteo(Request $request, HttpClientInterface $httpClient): JsonResponse {
+    public function cityMeteo(Request $request, HttpClientInterface $httpClient): JsonResponse
+    {
         $city = $request->get('city');
         $idCache = "getMeteo-" . $city;
         $weatherData = $this->cache->get($idCache, function (ItemInterface $item) use ($city, $httpClient) {

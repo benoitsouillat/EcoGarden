@@ -20,7 +20,7 @@ logs:
 	docker-compose --env-file .env.docker logs -f
 
 # Démarre les conteneurs
-restart:
+start:
 	docker-compose --env-file .env.docker up -d
 
 # Redémarre les conteneurs

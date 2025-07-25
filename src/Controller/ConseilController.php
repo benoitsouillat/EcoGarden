@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\Conseil;
-use App\Entity\User;
 use DateTime;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,7 +21,10 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
-#[Route('/conseil', name: 'api_conseil_')]
+#[Route(
+    '/conseil',
+    name: 'api_conseil_'
+)]
 final class ConseilController extends AbstractController
 {
     public function __construct(
@@ -32,8 +34,13 @@ final class ConseilController extends AbstractController
         public readonly TagAwareCacheInterface $cache
     ){}
 
-    #[Route('', name: 'all', methods: ['GET'])]
-    public function getAllConseils(Request $request): JsonResponse {
+    #[Route(
+        '',
+        name: 'all',
+        methods: ['GET']
+    )]
+    public function getAllConseils(Request $request): JsonResponse
+    {
         $page = $request->get('page', 1);
         $limit = $request->get('limit', 5);
         $repo = $this->manager->getRepository(Conseil::class);
@@ -44,14 +51,16 @@ final class ConseilController extends AbstractController
             $item->tag('conseilsCache');
             $item->expiresAfter(600);
             $conseils = $repo->findAllWithPagination($month, $page, $limit);
+
             return $this->serializer->serialize($conseils, 'json', ['groups' => 'getConseils']);
         });
+
         return new JsonResponse($json, Response::HTTP_OK, [], true);
     }
 
     #[Route('/{month}', name: 'show', requirements: ['id'=>'\d+'], methods: ['GET'])]
-    public function getConseilsByMonth(Request $request): JsonResponse {
-        $month = $request->get('month');
+    public function getConseilsByMonth(int $month): JsonResponse {
+        /*$month = $request->get('month');*/
         if ($month > 12 || $month < 1) {
             throw new HttpException(Response::HTTP_BAD_REQUEST, "Veuillez consulter un mois valide");
         }
