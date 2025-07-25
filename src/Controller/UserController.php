@@ -9,6 +9,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
@@ -27,7 +28,7 @@ final class UserController extends AbstractController
     {}
 
     #[Route('', name: 'create', methods: ['POST'])]
-    public function makeUser(Request $request): JsonResponse {
+    public function makeUser(Request $request, UserPasswordHasherInterface $hasher): JsonResponse {
         $user = $this->serializer->deserialize($request->getContent(), User::class, 'json');
         $errors = $this->validator->validate($user);
         if ($errors->count() > 0) {
@@ -36,6 +37,8 @@ final class UserController extends AbstractController
         if ($this->manager->getRepository(User::class)->findOneBy(['email' => $user->getEmail()])) {
             return new JsonResponse($this->serializer->serialize(['error' => 'Cet utilisateur existe déjà'], 'json'), Response::HTTP_BAD_REQUEST, [], true);
         }
+        $user->setPassword($hasher->hashPassword($user, $user->getPassword()));
+        $user->setRoles(['ROLE_USER']);
         $this->manager->persist($user);
         $this->manager->flush();
         $json = $this->serializer->serialize($user, 'json');
