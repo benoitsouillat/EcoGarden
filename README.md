@@ -1,50 +1,50 @@
 # EcoGarden
 
-EcoGarden est une API permettant de récupérer des conseils de jardinage en fonction du mois choisi ou de la saison en cours.
-Elle est également connecté à une API de météo pour récupérer les données de la météo de la ville choisie ou de la ville de l'utilisateur
+EcoGarden is an API for retrieving gardening tips based on the chosen month or the current season.
+It is also connected to a weather API to retrieve weather data for the chosen city or the user's city.
 
-## Prérequis
+## Prerequisites
 
 * **Docker** 
 * **Make**
 
-## Cloner le projet
+## Clone the project
 
 ## Installation
 
-Suivez ces étapes pour mettre en place l'environnement de développement local :
+Follow these steps to set up the local development environment:
 
-1. Configurer le fichier .env.docker avec les ports que vous souhaitez utiliser pour votre projet
+1. Configure the .env.docker file with the ports you want to use for your project
 
-2. Installer le projet avec Make
-   * ```Make up```: Démarre le projet dans un docker suivant les configurations du fichier env .env.docker
-   * ```Make down``` : Arrête les containers
+2. Install the project with Make
+   * ```Make up```: Starts the project in a docker according to the configurations of the .env.docker env file
+   * ```Make down``` : Stops the containers
 
-3. Installez les dépendances :
+3. Install the dependencies:
 
    ```docker-compose --env-file .env.docker exec php composer install```
 
-    ou
+    or
 
-   Autoriser les executables ./symfony et ./symfony-composer et ```./symfony-composer install```
-4. Remplir le .env ou copier les valeurs dans un .env.dev
-5. Créer la base de données et ses données initiales :
+   Allow the executables ./symfony and ./symfony-composer and ```./symfony-composer install```
+4. Fill the .env or copy the values into a .env.dev
+5. Create the database and its initial data:
 
     ```./symfony doctrine:migrations:migrate```
-6. Générer les clés privés et public pour JWT dans le dossier :
+6. Generate the private and public keys for JWT in the folder:
    * config/jwt/private.pem
    * config/jwt/public.pem
    
      ( ```./symfony lexik:jwt:generate-keypair``` )
-7. Optionnel : Modifier le Factory AdministratorFactory pour utiliser des données personnalisé pour le compte admin
-8. Générer les fixtures : ```./symfony doctrine:fixtures:load```
+7. Optional: Modify the AdministratorFactory Factory to use custom data for the admin account
+8. Generate the fixtures: ```./symfony doctrine:fixtures:load```
 
-## Utilisation
+## USAGE
 
 POSTMAN : 
-    Utilisez localhost:{PORT} -- *{PORT} = Port configuré dans le .env.docker*
+    Use localhost:{PORT} -- *{PORT} = Port configuré dans le .env.docker*
 
 * Executables : 
-    * ```./symfony``` : Raccourci pour la commande ```php bin/console``` dans le container php
-    * ```./symfony-composer``` : Raccourci pour la commande ```composer``` dans le container php
+    * ```./symfony``` : Shortcut for the ```php bin/console``` command in the php container
+    * ```./symfony-composer``` : Shortcut for the ```composer``` command in the php container
 
