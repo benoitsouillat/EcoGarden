@@ -1,9 +1,7 @@
 <?php
-
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -27,27 +25,47 @@ final class UserController extends AbstractController
     )
     {}
 
-    #[Route('', name: 'create', methods: ['POST'])]
-    public function makeUser(Request $request, UserPasswordHasherInterface $hasher): JsonResponse {
+    #[Route(
+        '',
+        name: 'create',
+        methods: ['POST']
+    )]
+    public function makeUser(Request $request, UserPasswordHasherInterface $hasher): JsonResponse
+    {
         $user = $this->serializer->deserialize($request->getContent(), User::class, 'json');
         $errors = $this->validator->validate($user);
         if ($errors->count() > 0) {
             return new JsonResponse($this->serializer->serialize($errors, 'json'), Response::HTTP_BAD_REQUEST, [], true);
         }
         if ($this->manager->getRepository(User::class)->findOneBy(['email' => $user->getEmail()])) {
-            return new JsonResponse($this->serializer->serialize(['error' => 'Cet utilisateur existe déjà'], 'json'), Response::HTTP_BAD_REQUEST, [], true);
+            return new JsonResponse(
+                $this->serializer->serialize(['error' => 'Cet utilisateur existe déjà'], 'json'),
+                Response::HTTP_BAD_REQUEST,
+                [],
+                true
+            );
         }
         $user->setPassword($hasher->hashPassword($user, $user->getPassword()));
         $user->setRoles(['ROLE_USER']);
         $this->manager->persist($user);
         $this->manager->flush();
+
         $json = $this->serializer->serialize($user, 'json');
         return new JsonResponse($json, Response::HTTP_CREATED, [], true);
     }
 
-    #[IsGranted('ROLE_ADMIN', message: "Seuls les administrateurs peuvent mettre à jour les utilisateurs.")]
-    #[Route('/{id}', name: 'update', requirements: ['id'=>'\d+'], methods: ['PUT'])]
-    public function updateUser(User $user, Request $request): JsonResponse {
+    #[IsGranted(
+        'ROLE_ADMIN',
+        message: "Seuls les administrateurs peuvent mettre à jour les utilisateurs."
+    )]
+    #[Route(
+        '/{id}',
+        name: 'update',
+        requirements: ['id'=>'\d+'],
+        methods: ['PUT']
+    )]
+    public function updateUser(User $user, Request $request): JsonResponse
+    {
         $updatedUser = $this->serializer->deserialize($request->getContent(), User::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $user]);
         $errors = $this->validator->validate($updatedUser);
         if ($errors->count() > 0) {
@@ -59,12 +77,22 @@ final class UserController extends AbstractController
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
-    #[IsGranted('ROLE_ADMIN', message: "Seuls les administrateurs peuvent mettre à jour les utilisateurs.")]
-    #[Route('{id}', name: 'delete', requirements: ['id'=>'\d+'], methods: ['DELETE'])]
-    public function deleteUser(User $user): JsonResponse {
+    #[IsGranted(
+        'ROLE_ADMIN',
+        message: "Seuls les administrateurs peuvent mettre à jour les utilisateurs."
+    )]
+    #[Route(
+        '{id}',
+        name: 'delete',
+        requirements: ['id'=>'\d+'],
+        methods: ['DELETE']
+    )]
+    public function deleteUser(User $user): JsonResponse
+    {
         $this->manager->remove($user);
         $this->manager->flush();
-        return new JsonResponse([], Response::HTTP_NO_CONTENT);
+
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
 }
