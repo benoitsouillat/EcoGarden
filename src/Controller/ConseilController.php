@@ -32,7 +32,7 @@ final class ConseilController extends AbstractController
         public readonly TagAwareCacheInterface $cache
     ){}
 
-    #[Route('', name: 'conseils', methods: ['GET'])]
+    #[Route('', name: 'all', methods: ['GET'])]
     public function getAllConseils(Request $request): JsonResponse {
         $page = $request->get('page', 1);
         $limit = $request->get('limit', 5);
@@ -49,7 +49,7 @@ final class ConseilController extends AbstractController
         return new JsonResponse($json, Response::HTTP_OK, [], true);
     }
 
-    #[Route('/{month}', name: 'conseil_show', requirements: ['id'=>'\d+'], methods: ['GET'])]
+    #[Route('/{month}', name: 'show', requirements: ['id'=>'\d+'], methods: ['GET'])]
     public function getConseilsByMonth(Request $request): JsonResponse {
         $month = $request->get('month');
         if ($month > 12 || $month < 1) {

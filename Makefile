@@ -19,6 +19,10 @@ prune:
 logs:
 	docker-compose --env-file .env.docker logs -f
 
+# Démarre les conteneurs
+restart:
+	docker-compose --env-file .env.docker up -d
+
 # Redémarre les conteneurs
 restart:
 	docker-compose --env-file .env.docker restart
