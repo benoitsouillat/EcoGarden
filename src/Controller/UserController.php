@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controller;
 
 use App\Entity\User;
@@ -22,8 +23,8 @@ final class UserController extends AbstractController
         public readonly EntityManagerInterface $manager,
         private readonly SerializerInterface $serializer,
         public readonly ValidatorInterface $validator,
-    )
-    {}
+    ) {
+    }
 
     #[Route(
         '',
@@ -35,7 +36,12 @@ final class UserController extends AbstractController
         $user = $this->serializer->deserialize($request->getContent(), User::class, 'json');
         $errors = $this->validator->validate($user);
         if ($errors->count() > 0) {
-            return new JsonResponse($this->serializer->serialize($errors, 'json'), Response::HTTP_BAD_REQUEST, [], true);
+            return new JsonResponse(
+                $this->serializer->serialize($errors, 'json'),
+                Response::HTTP_BAD_REQUEST,
+                [],
+                true
+            );
         }
         if ($this->manager->getRepository(User::class)->findOneBy(['email' => $user->getEmail()])) {
             return new JsonResponse(
@@ -45,12 +51,13 @@ final class UserController extends AbstractController
                 true
             );
         }
+
         $user->setPassword($hasher->hashPassword($user, $user->getPassword()));
         $user->setRoles(['ROLE_USER']);
         $this->manager->persist($user);
         $this->manager->flush();
-
         $json = $this->serializer->serialize($user, 'json');
+
         return new JsonResponse($json, Response::HTTP_CREATED, [], true);
     }
 
@@ -61,12 +68,18 @@ final class UserController extends AbstractController
     #[Route(
         '/{id}',
         name: 'update',
-        requirements: ['id'=>'\d+'],
+        requirements: ['id' => '\d+'],
         methods: ['PUT']
     )]
     public function updateUser(User $user, Request $request): JsonResponse
     {
-        $updatedUser = $this->serializer->deserialize($request->getContent(), User::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $user]);
+        $updatedUser = $this->serializer->deserialize(
+            $request->getContent(),
+            User::class,
+            'json',
+            [AbstractNormalizer::OBJECT_TO_POPULATE => $user]
+        );
+
         $errors = $this->validator->validate($updatedUser);
         if ($errors->count() > 0) {
             throw new ValidationFailedException("400", $errors);
@@ -84,7 +97,7 @@ final class UserController extends AbstractController
     #[Route(
         '{id}',
         name: 'delete',
-        requirements: ['id'=>'\d+'],
+        requirements: ['id' => '\d+'],
         methods: ['DELETE']
     )]
     public function deleteUser(User $user): JsonResponse
